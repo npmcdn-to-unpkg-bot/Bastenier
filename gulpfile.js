@@ -19,6 +19,7 @@ var runSequence  = require('run-sequence');
 var sass         = require('gulp-sass');
 var sourcemaps   = require('gulp-sourcemaps');
 var uglify       = require('gulp-uglify');
+var csscomb      = require('gulp-csscomb');
 
 // See https://github.com/austinpray/asset-builder
 var manifest = require('asset-builder')('./assets/manifest.json');
@@ -159,6 +160,27 @@ var writeToManifest = function(directory) {
     .pipe(gulp.dest, path.dist)();
 };
 
+
+//linting with css comb.
+var linting = false;
+var lintingTimer;
+gulp.task('lint',function(cb){
+    if(!linting){
+        linting = true;
+        clearTimeout(linting);
+        var stream = gulp.src(['assets/styles/*.scss','assets/styles/**/*.scss','assets/styles/**/**/*.scss'])
+            .pipe(csscomb())
+            .pipe(gulp.dest('assets/styles'));
+        stream.on("end",function(){
+             lintingTimer = setTimeout(function(){
+                    linting = false;
+             },200);
+        })
+        return stream;
+    }
+    return cb();
+})
+
 // ## Gulp tasks
 // Run `gulp -T` for a task summary
 
@@ -251,7 +273,12 @@ gulp.task('watch', function() {
       blacklist: ['/wp-admin/**']
     }
   });
-  gulp.watch([path.source + 'styles/**/*'], ['styles']);
+  gulp.watch([path.source + 'styles/**/*'], function(){
+    if(!linting){
+        gulp.start("lint");
+        gulp.start("styles");
+    }
+  });
   gulp.watch([path.source + 'scripts/**/*'], ['jshint', 'scripts']);
   gulp.watch([path.source + 'fonts/**/*'], ['fonts']);
   gulp.watch([path.source + 'images/**/*'], ['images']);

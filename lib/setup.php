@@ -75,17 +75,17 @@ function widgets_init() {
 add_action('widgets_init', __NAMESPACE__ . '\\widgets_init');
 
 /**
- * Determine which pages should NOT display the sidebar
+ * Determine which pages should display the sidebar
  */
 function display_sidebar() {
   static $display;
 
-  isset($display) || $display = !in_array(true, [
+  isset($display) || $display = in_array(true, [
     // The sidebar will NOT be displayed if ANY of the following return true.
     // @link https://codex.wordpress.org/Conditional_Tags
-    is_404(),
-    is_front_page(),
-    is_page_template('template-custom.php'),
+    // is_404(),
+    // is_front_page(),
+    // is_page_template('template-custom.php'),
   ]);
 
   return apply_filters('sage/display_sidebar', $display);
@@ -101,6 +101,15 @@ function assets() {
     wp_enqueue_script('comment-reply');
   }
 
-  wp_enqueue_script('sage/js', Assets\asset_path('scripts/main.js'), ['jquery'], null, true);
+  //vendor
+  wp_enqueue_script( 'gsap-js', 'https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js', array(), false, true );
+  wp_enqueue_script( 'imagesloaded-js', 'https://npmcdn.com/imagesloaded@4.1/imagesloaded.pkgd.min.js', array(), false, true );
+
+
+  //custom
+  wp_enqueue_script('sage/banner', Assets\asset_path('scripts/banner.js'), ['jquery','gsap-js','imagesloaded-js'], null, true);
+
+  //main
+  wp_enqueue_script('sage/js', Assets\asset_path('scripts/main.js'), ['jquery', 'sage/banner'], null, true);
 }
 add_action('wp_enqueue_scripts', __NAMESPACE__ . '\\assets', 100);

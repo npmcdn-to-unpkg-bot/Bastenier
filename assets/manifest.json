@@ -12,6 +12,11 @@
       ],
       "main": true
     },
+    "banner.js": {
+      "files": [
+        "scripts/layouts/banner.js"
+      ]
+    },
     "customizer.js": {
       "files": [
         "scripts/customizer.js"
